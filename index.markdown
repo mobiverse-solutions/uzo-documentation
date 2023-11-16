@@ -5,377 +5,64 @@
 layout: home
 ---
 
+#### USSD Flow 
+To initiate a USSD session, the user dials a USSD code from their mobile handset. The Telco USSD Gateway receives the request and routes it to Uzo. Uzo then sends the request to the client's application URL using HTTP POST method with json data. The client's application URL is the endpoint that handles the USSD logic and responds to the user's input.
+
 ![ussd-message-flow](/assets/images/ussd-flow.png){:class="img-responsive"}
 
 
-[Uzo Website](https://uzo.mobivs.com/){:target="_blank"}{:rel="noopener noreferrer"}
 
-```php
-<?php
 
-class P
+#### The Uzo POST request body
+
+```json
 {
-
+    "ussdString" : "*1234#", 
+    "msisdn" : "+233111111111",
+    "ussdServiceOp" : "1", 
+    "sessionId" : "12341235123",
+    "network" : "06"
 }
 ```
 
-## Create beautiful REST API docs authored in Markdown
+**msisdn:** The phone number of the requester
 
-- Adopted from: https://stubby4j.com/docs/admin_portal.html
-- Inspired by Swagger API docs style & structure: https://petstore.swagger.io/#/pet
+**ussdString:** The input provided by the requester. For initiating requests this will always be the
+USSD query string eg.*1234#
 
-------------------------------------------------------------------------------------------
+**sessionID:** Session ID for the USSD transaction
 
-#### Creating new/overwriting existing stubs & proxy configs
+**ussdServiceOp:** This determines the kind of request. The following are the values and their meanings:
 
-<details>
- <summary><code>POST</code> <code><b>/</b></code> <code>(overwrites all in-memory stub and/or proxy-config)</code></summary>
+| Value             | Description          |
+|-------------------|----------------------|
+| `1`               | initiating request   |
+| `18`              | continuing request   |
+| `29 or greater`   | terminating request  |
 
-##### Parameters
 
-> | name      |  type     | data type               | description                                                           |
-> |-----------|-----------|-------------------------|-----------------------------------------------------------------------|
-> | None      |  required | object (JSON or YAML)   | N/A  |
 
+**network:** This value identifies the network provider from which the request is coming. The value
+is the MNC of the network provider. Follow this link [https://mcc-mnc-list.com/list](https://mcc-mnc-list.com/list){:target="_blank"}{:rel="noopener noreferrer"} to see a list of networks and corresponding
+MNCs
 
-##### Responses
 
-> | http code     | content-type                      | response                                                            |
-> |---------------|-----------------------------------|---------------------------------------------------------------------|
-> | `201`         | `text/plain;charset=UTF-8`        | `Configuration created successfully`                                |
-> | `400`         | `application/json`                | `{"code":"400","message":"Bad Request"}`                            |
-> | `405`         | `text/html;charset=utf-8`         | None                                                                |
+#### The Client App response body
 
-##### Example cURL
+```json
+{
+    "message" : "Welcome\n1 Say hello\n2 Exit", 
+    "ussdServiceOp" : 1
+}
+```
 
-> ```javascript
->  curl -X POST -H "Content-Type: application/json" --data @post.json http://localhost:8889/
-> ```
+**message:** Message to be sent back to user's phone screen. This is your app menu, etc.
 
-</details>
+**ussdServiceOp:** This defines the type of response. The valid values and their meanings are below: 
 
-------------------------------------------------------------------------------------------
+| Value             | Description          |
+|-------------------|----------------------|
+| `2`               | continuing response  |
+| `17`              | final response       |
 
-#### Listing existing stubs & proxy configs as YAML string
 
-<details>
- <summary><code>GET</code> <code><b>/</b></code> <code>(gets all in-memory stub & proxy configs)</code></summary>
-
-##### Parameters
-
-> None
-
-##### Responses
-
-> | http code     | content-type                      | response                                                            |
-> |---------------|-----------------------------------|---------------------------------------------------------------------|
-> | `200`         | `text/plain;charset=UTF-8`        | YAML string                                                         |
-
-##### Example cURL
-
-> ```javascript
->  curl -X GET -H "Content-Type: application/json" http://localhost:8889/
-> ```
-
-</details>
-
-<details>
- <summary><code>GET</code> <code><b>/{stub_numeric_id}</b></code> <code>(gets stub by its resource-id-{stub_numeric_id} in the YAML config)</code></summary>
-
-##### Parameters
-
-> | name              |  type     | data type      | description                         |
-> |-------------------|-----------|----------------|-------------------------------------|
-> | `stub_numeric_id` |  required | int ($int64)   | The specific stub numeric id        |
-
-##### Responses
-
-> | http code     | content-type                      | response                                                            |
-> |---------------|-----------------------------------|---------------------------------------------------------------------|
-> | `200`         | `text/plain;charset=UTF-8`        | YAML string                                                         |
-> | `400`         | `application/json`                | `{"code":"400","message":"Bad Request"}`                            |
-
-##### Example cURL
-
-> ```javascript
->  curl -X GET -H "Content-Type: application/json" http://localhost:8889/0
-> ```
-
-</details>
-
-<details>
-  <summary><code>GET</code> <code><b>/{uuid}</b></code> <code>(gets stub by its defined uuid property)</code></summary>
-
-##### Parameters
-
-> | name   |  type      | data type      | description                                          |
-> |--------|------------|----------------|------------------------------------------------------|
-> | `uuid` |  required  | string         | The specific stub unique idendifier                  |
-
-##### Responses
-
-> | http code     | content-type                      | response                                                            |
-> |---------------|-----------------------------------|---------------------------------------------------------------------|
-> | `200`         | `text/plain;charset=UTF-8`        | YAML string                                                         |
-> | `400`         | `application/json`                | `{"code":"400","message":"Bad Request"}`                            |
-
-##### Example cURL
-
-> ```javascript
->  curl -X GET -H "Content-Type: application/json" http://localhost:8889/some-unique-uuid-string
-> ```
-
-</details>
-
-
-<details>
-  <summary><code>GET</code> <code><b>/proxy-config/default</b></code> <code>(gets <b>default</b> proxy-config)</code></summary>
-
-##### Parameters
-
-> None
-
-##### Responses
-
-> | http code     | content-type                      | response                                                            |
-> |---------------|-----------------------------------|---------------------------------------------------------------------|
-> | `200`         | `text/plain;charset=UTF-8`        | YAML string                                                         |
-> | `400`         | `application/json`                | `{"code":"400","message":"Bad Request"}`                            |
-
-##### Example cURL
-
-> ```javascript
->  curl -X GET -H "Content-Type: application/json" http://localhost:8889/proxy-config/default
-> ```
-
-</details>
-
-
-<details>
-  <summary><code>GET</code> <code><b>/proxy-config/{uuid}</b></code> <code>(gets proxy config by its uuid property)</code></summary>
-
-##### Parameters
-
-> | name   |  type      | data type      | description                                                  |
-> |--------|------------|----------------|--------------------------------------------------------------|
-> | `uuid` |  required  | string         | The specific proxy config unique idendifier                  |
-
-##### Responses
-
-> | http code     | content-type                      | response                                                            |
-> |---------------|-----------------------------------|---------------------------------------------------------------------|
-> | `200`         | `text/plain;charset=UTF-8`        | YAML string                                                         |
-> | `400`         | `application/json`                | `{"code":"400","message":"Bad Request"}`                            |
-
-##### Example cURL
-
-> ```javascript
->  curl -X GET -H "Content-Type: application/json" http://localhost:8889/proxy-config/some-unique-uuid-string
-> ```
-
-</details>
-
-------------------------------------------------------------------------------------------
-
-
-#### Updating existing stubs & proxy configs
-
-<details>
-  <summary><code>PUT</code> <code><b>/{stub_numeric_id}</b></code> <code>(updates stub by its resource-id-{stub_numeric_id} in the config)</code></summary>
-
-##### Parameters
-
-> | name              |  type     | data type      | description                         |
-> |-------------------|-----------|----------------|-------------------------------------|
-> | `stub_numeric_id` |  required | int ($int64)   | The specific stub numeric id        |
-
-##### Responses
-
-> | http code     | content-type                      | response                                                            |
-> |---------------|-----------------------------------|---------------------------------------------------------------------|
-> | `201`         | `text/plain;charset=UTF-8`        | `Stub request index#<stub_numeric_id> updated successfully"`        |
-> | `400`         | `application/json`                | `{"code":"400","message":"Bad Request"}`                            |
-> | `405`         | `text/html;charset=utf-8`         | None                                                                |
-
-##### Example cURL
-
-> ```javascript
->  curl -X PUT -H "Content-Type: application/json" --data @put.json http://localhost:8889/0
-> ```
-
-</details>
-
-<details>
-  <summary><code>PUT</code> <code><b>/{uuid}</b></code> <code>(updates stub by its defined uuid property)</code></summary>
-
-##### Parameters
-
-> | name   |  type      | data type      | description                                          |
-> |--------|------------|----------------|------------------------------------------------------|
-> | `uuid` |  required  | string         | The specific stub unique idendifier                  |
-
-##### Responses
-
-> | http code     | content-type                      | response                                                            |
-> |---------------|-----------------------------------|---------------------------------------------------------------------|
-> | `201`         | `text/plain;charset=UTF-8`        | `Stub request uuid#<uuid> updated successfully`                     |
-> | `400`         | `application/json`                | `{"code":"400","message":"Bad Request"}`                            |
-> | `405`         | `text/html;charset=utf-8`         | None                                                                |
-
-##### Example cURL
-
-> ```javascript
->  curl -X PUT -H "Content-Type: application/json" --data @put.json http://localhost:8889/some-unique-uuid-string
-> ```
-
-</details>
-
-<details>
-  <summary><code>PUT</code> <code><b>/proxy-config/default</b></code> <code>(updates <b>default</b> proxy-config)</code></summary>
-
-##### Parameters
-
-> None
-
-##### Responses
-
-> | http code     | content-type                      | response                                                            |
-> |---------------|-----------------------------------|---------------------------------------------------------------------|
-> | `201`         | `text/plain;charset=UTF-8`        | `Proxy config uuid#default updated successfully`                    |
-> | `400`         | `application/json`                | `{"code":"400","message":"Bad Request"}`                            |
-> | `405`         | `text/html;charset=utf-8`         | None                                                                |
-
-##### Example cURL
-
-> ```javascript
->  curl -X PUT -H "Content-Type: application/json" --data @put.json http://localhost:8889/proxy-config/default
-> ```
-
-</details>
-
-<details>
-  <summary><code>PUT</code> <code><b>/proxy-config/{uuid}</b></code> <code>(updates proxy-config by its uuid property)</code></summary>
-
-##### Parameters
-
-> | name   |  type      | data type      | description                                                  |
-> |--------|------------|----------------|--------------------------------------------------------------|
-> | `uuid` |  required  | string         | The specific proxy config unique idendifier                  |
-
-##### Responses
-
-> | http code     | content-type                      | response                                                            |
-> |---------------|-----------------------------------|---------------------------------------------------------------------|
-> | `201`         | `text/plain;charset=UTF-8`        | `Proxy config uuid#<uuid> updated successfully`                     |
-> | `400`         | `application/json`                | `{"code":"400","message":"Bad Request"}`                            |
-> | `405`         | `text/html;charset=utf-8`         | None                                                                |
-
-##### Example cURL
-
-> ```javascript
->  curl -X PUT -H "Content-Type: application/json" --data @put.json http://localhost:8889/proxy-config/some-unique-uuid-string
-> ```
-
-</details>
-
-------------------------------------------------------------------------------------------
-
-#### Deleting existing stubs & proxy configs
-
-<details>
-  <summary><code>DELETE</code> <code><b>/</b></code> <code>(deletes all in-memory stub & proxy configs)</code></summary>
-
-##### Parameters
-
-> None
-
-##### Responses
-
-> | http code     | content-type                      | response                                                            |
-> |---------------|-----------------------------------|---------------------------------------------------------------------|
-> | `200`         | `text/plain;charset=UTF-8`        | `All in-memory YAML config was deleted successfully`                |
-
-##### Example cURL
-
-> ```javascript
->  curl -X DELETE -H "Content-Type: application/json" http://localhost:8889/
-> ```
-
-</details>
-
-<details>
-  <summary><code>DELETE</code> <code><b>/{stub_numeric_id}</b></code> <code>(deletes stub by its resource-id-{stub_numeric_id} in the config)</code></summary>
-
-##### Parameters
-
-> | name              |  type     | data type      | description                         |
-> |-------------------|-----------|----------------|-------------------------------------|
-> | `stub_numeric_id` |  required | int ($int64)   | The specific stub numeric id        |
-
-##### Responses
-
-> | http code     | content-type                      | response                                                            |
-> |---------------|-----------------------------------|---------------------------------------------------------------------|
-> | `200`         | `text/plain;charset=UTF-8`        | `Stub request index#<stub_numeric_id> deleted successfully`         |
-> | `400`         | `application/json`                | `{"code":"400","message":"Bad Request"}`                            |
-
-##### Example cURL
-
-> ```javascript
->  curl -X DELETE -H "Content-Type: application/json" http://localhost:8889/0
-> ```
-
-</details>
-
-
-<details>
-  <summary><code>DELETE</code> <code><b>/{uuid}</b></code> <code>(updates stub by its defined uuid property)</code></summary>
-
-##### Parameters
-
-> | name   |  type      | data type      | description                                          |
-> |--------|------------|----------------|------------------------------------------------------|
-> | `uuid` |  required  | string         | The specific stub unique idendifier                  |
-
-
-##### Responses
-
-> | http code     | content-type                      | response                                                            |
-> |---------------|-----------------------------------|---------------------------------------------------------------------|
-> | `200`         | `text/plain;charset=UTF-8`        | `Stub request uuid#<uuid> deleted successfully`                     |
-> | `400`         | `application/json`                | `{"code":"400","message":"Bad Request"}`                            |
-
-##### Example cURL
-
-> ```javascript
->  curl -X DELETE -H "Content-Type: application/json" http://localhost:8889/some-unique-uuid-string
-> ```
-
-</details>
-
-
-<details>
-  <summary><code>DELETE</code> <code><b>/proxy-config/{uuid}</b></code> <code>(deletes proxy-config by its uuid property)</code></summary>
-
-##### Parameters
-
-> | name   |  type      | data type      | description                                                  |
-> |--------|------------|----------------|--------------------------------------------------------------|
-> | `uuid` |  required  | string         | The specific proxy config unique idendifier                  |
-
-##### Responses
-
-> | http code     | content-type                      | response                                                            |
-> |---------------|-----------------------------------|---------------------------------------------------------------------|
-> | `200`         | `text/plain;charset=UTF-8`        | `Proxy config uuid#<uuid> deleted successfully`                     |
-> | `400`         | `application/json`                | `{"code":"400","message":"Bad Request"}`                            |
-
-##### Example cURL
-
-> ```javascript
->  curl -X DELETE -H "Content-Type: application/json" http://localhost:8889/proxy-config/some-unique-uuid-string
-> ```
-
-</details>
-
-------------------------------------------------------------------------------------------
