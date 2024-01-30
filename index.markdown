@@ -21,16 +21,17 @@ To initiate a USSD session, the user dials a USSD code from their mobile handset
     "msisdn" : "+233111111111",
     "ussdServiceOp" : "1", 
     "sessionId" : "12341235123",
-    "network" : "06"
+    "network" : "06",
+    "code":"*1234#",
+    "country":"GH"
 }
 ```
 
-**msisdn:** The phone number of the requester
 
 **ussdString:** The input provided by the requester. For initiating requests this will always be the
 USSD query string eg.*1234#
 
-**sessionID:** Session ID for the USSD transaction
+**msisdn:** The phone number of the requester
 
 **ussdServiceOp:** This determines the kind of request. The following are the values and their meanings:
 
@@ -41,10 +42,15 @@ USSD query string eg.*1234#
 | `29 or greater`   | terminating request  |
 
 
+**sessionID:** Session ID for the USSD transaction
 
 **network:** This value identifies the network provider from which the request is coming. The value
 is the MNC of the network provider. Follow this link [https://mcc-mnc-list.com/list](https://mcc-mnc-list.com/list){:target="_blank"}{:rel="noopener noreferrer"} to see a list of networks and corresponding
 MNCs
+
+**code:** The USSD code dialed to initiate the USSD session
+
+**country:** This is the originating country of the USSD request
 
 
 #### The Client App response body
