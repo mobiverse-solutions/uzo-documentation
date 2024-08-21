@@ -20,7 +20,7 @@ To initiate a USSD session, the user dials a USSD code from their mobile handset
     "ussdString" : "*1234#", 
     "msisdn" : "+233111111111",
     "ussdServiceOp" : "1", 
-    "sessionId" : "12341235123",
+    "sessionID" : "12341235123",
     "network" : "06",
     "code":"*1234#",
     "country":"GH"
