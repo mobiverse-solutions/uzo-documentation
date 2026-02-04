@@ -58,7 +58,7 @@ MNCs
 ```json
 {
     "message" : "Welcome\n1 Say hello\n2 Exit", 
-    "ussdServiceOp" : 1
+    "ussdServiceOp" : 2
 }
 ```
 
